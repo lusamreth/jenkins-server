@@ -18,5 +18,5 @@ services:
 
 networks:
   jenkins:
-    - name: jenkins-network
-    - driver: bridge
+    name: jenkins-network
+    driver: bridge
