@@ -17,8 +17,8 @@ services:
       - jenkins
 
 volumes:
-  - jenkin-data
-  - jenkins-docker-certs
+  - jenkin-data:
+  - jenkins-docker-certs:
 
 networks:
   jenkins:
