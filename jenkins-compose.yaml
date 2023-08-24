@@ -2,9 +2,14 @@
 version: "3.8"
 services:
   jenkins:
-    image: jenkins/jenkins:lts
+    image: jenkins/ansible-jenkins:latest
+    build:
+      dockerfile: Dockerfile
+      tags:
+        - jenkins/ansible-jenkins:latest
     privileged: true
     user: root
+    restart: always
     ports:
       - 8080:8080
       - 50000:50000
@@ -15,6 +20,10 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - jenkins
+
+volumes:
+  jenkins-data:
+  jenkins-docker-certs:
 
 networks:
   jenkins:
