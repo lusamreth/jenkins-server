@@ -1,0 +1,60 @@
+# must learn to run docker build ,prune , image and deploy
+pipeline {
+    agent any 
+    
+    stages {
+        stage("SCM Checkout"){
+            steps {
+                git branch: 'main',
+                credentialsId: 'JENKIN_GIT_DEPLOY_KEY',
+                url: 'git@github.com:Polymer-Pay/polymer-pay-mvp-v2.0-frontend.git'
+                sh """
+                    ls -la
+                """
+            }
+        }
+
+        stage("Running ansible"){
+            steps {
+                sh """ 
+                    ansible --version
+                    ansible-playbook playbook.yml
+                """
+            }
+        }
+        stage("Connecting to ssh"){
+
+            steps {
+                echo "Accessing SSH creds"
+                withCredentials([sshUserPrivateKey(credentialsId: 'SSH_DEPLOY_KEY', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER',passphraseVariable: '')]) {
+                        sh """
+                            ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" admin@ec2-13-250-10-105.ap-southeast-1.compute.amazonaws.com
+                            cd ~/ && touch jenkin_touchdown.txt
+                            ls
+                        """
+                }
+            }
+        }
+        stage("Running docker build"){
+            
+            environment {
+                NODE_ENV = "production"
+                ENV_FILE = ".env.prod"
+            }
+            steps {
+                echo "GUGU GAGA"
+            }
+        }
+    }
+    post {
+        always {
+            echo "The Triggered Job is finished"
+        }
+        failure {
+            echo "Encountered failure"
+        }
+        
+    }
+    
+}
+
