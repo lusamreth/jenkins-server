@@ -63,6 +63,7 @@
           - docker-compose-plugin
         state: present
         allow_downgrade: yes
+        update_cache: yes
 
     - name: Check If Docker Is Installed
       command: docker --version
