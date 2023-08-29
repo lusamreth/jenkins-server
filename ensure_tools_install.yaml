@@ -69,10 +69,9 @@
       ignore_errors: yes
 
     - name: Retrieve lazy-docker installation binary
-      url: https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh
-      dest: /tmp/install-lazydocker.sh
-      method: GET
-      return_content: true
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh
+        dest: /tmp/install-lazydocker.sh
 
     - name: Execute lazy-docker installation script
       shell: /tmp/install-lazydocker.sh
