@@ -61,13 +61,19 @@
           - containerd.io
           - docker-buildx-plugin
           - docker-compose-plugin
-        state: present
+        state: latest
         update_cache: true
 
     - name: Check If Docker Is Installed
       command: docker --version
       register: docker_valid
       ignore_errors: yes
+
+    - name: Enable and start Docker service
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+        enabled: true
 
     - name: Retrieve lazy-docker installation binary
       ansible.builtin.get_url:
