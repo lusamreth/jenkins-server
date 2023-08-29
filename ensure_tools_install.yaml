@@ -1,4 +1,5 @@
 - hosts: localhost
+  become: true
   tasks:
     - name: Install required system packages
       apt:
