@@ -8,6 +8,7 @@
           - ca-certificates
           - curl
           - software-properties-common
+          - gnupg-agent
           - virtualenv
           - python3-setuptools
           - gnupg
@@ -38,10 +39,6 @@
         name: python3-pip
         state: present
         allow_downgrade: yes
-
-    - name: Remove useless packages from the cache
-      ansible.builtin.apt:
-        autoclean: yes
 
     - name: Add docker gpg
       apt_key:
@@ -74,6 +71,10 @@
         name: docker
         state: restarted
         enabled: true
+
+    - name: Remove useless packages from the cache
+      ansible.builtin.apt:
+        autoclean: yes
 
     - name: Retrieve lazy-docker installation binary
       ansible.builtin.get_url:
