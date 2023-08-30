@@ -50,16 +50,17 @@
         repo: deb https://download.docker.com/linux/ubuntu bionic stable
         state: present
 
-    - name: ensure docker installation
-      ansible.builtin.apt:
-        pkg:
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
-          - docker-buildx-plugin
-          - docker-compose-plugin
+    - name: install docker
+      apt:
+        name: "{{item}}"
         state: latest
-        update_cache: true
+        update_cache: yes
+      loop:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        - docker-buildx-plugin
+        - docker-compose-plugin
 
     - name: Check If Docker Is Installed
       command: docker --version
