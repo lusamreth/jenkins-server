@@ -30,13 +30,13 @@
 
 - name: Add user jenkins to Docker group
   user:
-    name: jenkins
+    name: { { primary_user } }
     groups: docker
     append: yes
 
 - name: Retrieve lazy-docker installation binary
   ansible.builtin.get_url:
-    url: https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh
+    url: { { lazy_docker_url } }
     dest: /tmp/install-lazydocker.sh
 
 - name: Execute lazy-docker installation script
