@@ -1,0 +1,49 @@
+---
+- name: Check If Docker Is Installed
+  command: docker --version
+  register: docker_valid
+  ignore_errors: true
+
+- name: Ensure Docker is Installed
+  apt:
+    name: docker.io
+    state: present
+    update_cache: true
+  when: docker_valid.return_code != 0
+
+- name: Check If Docker Is Installed
+  command: docker --version
+  register: docker_valid
+  ignore_errors: true
+
+- name: Enable and start Docker service
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+    enabled: true
+  when: docker_valid.return_code == 0
+
+- name: Ensure group "docker" exists
+  ansible.builtin.group:
+    name: docker
+    state: present
+
+- name: Add user jenkins to Docker group
+  user:
+    name: jenkins
+    groups: docker
+    append: yes
+
+- name: Retrieve lazy-docker installation binary
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh
+    dest: /tmp/install-lazydocker.sh
+
+- name: Execute lazy-docker installation script
+  shell: /tmp/install-lazydocker.sh
+  when: download.changed
+
+- name: Remove lazy-docker script
+  file:
+    path: /tmp/install-lazydocker.sh
+    present: absent

@@ -1,0 +1,13 @@
+- name: Retrieve lazy-docker installation binary
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh
+    dest: /tmp/install-lazydocker.sh
+
+- name: Execute lazy-docker installation script
+  shell: /tmp/install-lazydocker.sh
+  when: download.changed
+
+- name: Remove lazy-docker script
+  file:
+    path: /tmp/install-lazydocker.sh
+    present: absent
