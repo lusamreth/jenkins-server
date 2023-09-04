@@ -43,8 +43,18 @@
         state: started
 
     - name: Running certbot certificate renewal
-      shell: certbot -d {{ https_domain_url }} --nginx
+      vars:
+        certbot_auto_renew: true
+        certbot_auto_renew_user: "{{ ansible_user | default(lookup('env', 'USER')) }}"
+        certbot_auto_renew_hour: "5"
+        certbot_auto_renew_minute: "30"
+        certbot_auto_renew_options: "--quiet"
+        certbot_certs:
+          - email: lusomreth@gmail.com
+      # shell: certbot -d {{ https_domain_url }} --nginx
 
+  roles:
+    - geerlingguy.certbot
   handlers:
     - name: restart nginx
       service:
