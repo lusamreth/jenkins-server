@@ -64,4 +64,4 @@
 - name: Remove lazy-docker script
   file:
     path: /tmp/install-lazydocker.sh
-    present: absent
+    state: absent
