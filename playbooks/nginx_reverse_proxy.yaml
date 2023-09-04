@@ -32,7 +32,7 @@
       file:
         src: "/etc/nginx/sites-available/{{ https_domain_url }}.conf"
         dest: "/etc/nginx/sites-enabled/{{ https_domain_url }}.conf"
-        state: soft
+        state: link
 
       notify:
         - reload nginx
