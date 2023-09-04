@@ -1,0 +1,58 @@
+- hosts: localhost
+  become: true
+  tasks:
+    - name: Ensure nginx is enabled
+      command: echo "starting nginx"
+      notify:
+        - restart nginx
+    - name: unlink nginx default cfg
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify:
+        - reload nginx
+
+    - name: create new nginx cfg
+      copy:
+        content: |
+          server {
+            listen 80;
+            server_name {{ https_domain_url }};
+            location / {
+              proxy_pass         http://localhost:{{ port }};
+              proxy_http_version 1.1;
+              proxy_set_header   Upgrade $http_upgrade;
+              proxy_set_header   Connection "upgrade";
+              proxy_set_header   Host $host;
+            }
+          }
+        dest: "/etc/nginx/sites-available/{{ https_domain_url }}.conf"
+
+    - name: enable new config file
+      file:
+        src: "/etc/nginx/sites-available/{{ https_domain_url }}.conf"
+        dest: "/etc/nginx/sites-enabled/{{ https_domain_url }}.conf"
+      notify:
+        - reload nginx
+
+    - name: Ensure certbot service is enabled
+      service:
+        name: certbot.timer
+        state: started
+
+    - name: Running certbot certificate renewal
+      shell: certbot -d {{ https_domain_url }} --nginx
+
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
+      listen: "restart web services"
+    - name: restart certbot
+      service:
+        name: certbot.timer
+        state: restarted
+    - name: reload nginx
+      become: true
+      shell: nginx -s reload
