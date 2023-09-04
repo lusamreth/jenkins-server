@@ -44,6 +44,11 @@
     groups: docker
     append: yes
 
+- name: Check if lazy-docker install
+  command: lazydocker --version
+  ignore_errors: true
+  register: installed
+
 - name: Retrieve lazy-docker installation binary
   ansible.builtin.get_url:
     url: "{{ lazy_docker_url }}"
