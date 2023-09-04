@@ -58,7 +58,7 @@
   register: download
 
 - name: Execute lazy-docker installation script
-  command: sh /tmp/install-lazydocker.sh
+  command: bash /tmp/install-lazydocker.sh
 
 - name: Remove lazy-docker script
   file:
