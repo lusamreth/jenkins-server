@@ -70,5 +70,5 @@
   become: true
   file:
     src: "/home/{{ primary_user }}/.local/bin/lazydocker"
-    dest: /usr/bin/
+    dest: /usr/bin/lazydocker
     state: link
