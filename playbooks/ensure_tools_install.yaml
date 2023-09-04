@@ -20,6 +20,17 @@
         name: python3
         state: present
 
+    - name: install pip3 package manager
+      ansible.builtin.apt:
+        name: python3-pip
+        state: present
+        allow_downgrade: yes
+
+    - name: install fish shell
+      ansible.builtin.apt:
+        name: fish
+        state: present
+
     - name: install nginx
       ansible.builtin.apt:
         name: nginx
@@ -33,28 +44,6 @@
           - certbot
           - python3-certbot-nginx
         state: present
-
-    - name: install pip3 package manager
-      ansible.builtin.apt:
-        name: python3-pip
-        state: present
-        allow_downgrade: yes
-
-    - name: Add docker gpg
-      apt_key:
-        url: https://download.docker.com/linux/debian/gpg
-        state: present
-
-    - name: Add Docker Repository
-      apt_repository:
-        repo: deb https://download.docker.com/linux/ubuntu bionic stable
-        state: present
-
-    - name: Add an Apt signing key to a specific keyring file
-      ansible.builtin.apt_key:
-        id: 9FED2BCBDCD29CDF762678CBAED4B06F473041FA
-        url: https://ftp-master.debian.org/keys/archive-key-6.0.asc
-        keyring: /etc/apt/trusted.gpg.d/debian.gpg
 
     - name: Remove useless packages from the cache
       ansible.builtin.apt:
