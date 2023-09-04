@@ -65,3 +65,10 @@
   file:
     path: /tmp/install-lazydocker.sh
     state: absent
+
+- name: symlink default lazydocker binary location to global /bin
+  become: true
+  file:
+    src: "/home/{{ primary_user }}/.local/bin/lazydocker"
+    dest: /usr/bin/
+    state: link
