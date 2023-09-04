@@ -44,6 +44,10 @@
     groups: docker
     append: yes
 
+- name: Include reset connection tasks
+  ansible.builtin.include_tasks: reset_connection.yaml
+  when: add_to_docker_group_result.changed == true
+
 - name: Check if lazy-docker install
   command: lazydocker --version
   ignore_errors: true
