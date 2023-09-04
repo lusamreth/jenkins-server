@@ -53,7 +53,7 @@
   ansible.builtin.get_url:
     url: "{{ lazy_docker_url }}"
     dest: /tmp/install-lazydocker.sh
-    mode: "u+rw"
+    mode: 0755
   when: installed.rc != 0
   register: download
 
