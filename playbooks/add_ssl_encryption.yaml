@@ -18,6 +18,8 @@
     certbot_auto_renew_options: "--quiet"
     certbot_certs:
       - email: lusomreth@gmail.com
+      - domains:
+          - "{{ https_domain_url }}"
       # shell: certbot -d {{ https_domain_url }} --nginx
 
   handlers:
