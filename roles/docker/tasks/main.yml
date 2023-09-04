@@ -59,7 +59,6 @@
 
 - name: Execute lazy-docker installation script
   shell: /tmp/install-lazydocker.sh
-  when: download.changed
 
 - name: Remove lazy-docker script
   file:
