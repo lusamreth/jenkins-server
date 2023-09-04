@@ -58,10 +58,10 @@
   register: download
 
 - name: Execute lazy-docker installation script
+  become_user: "{{ primary_user }}"
   shell: /tmp/install-lazydocker.sh
 
 - name: Remove lazy-docker script
-  become: true
   file:
     path: /tmp/install-lazydocker.sh
     state: absent
