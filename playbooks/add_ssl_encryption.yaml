@@ -5,6 +5,11 @@
       service:
         name: certbot.timer
         state: started
+    - name: Ensure crontab is installed
+      apt:
+        name: crontab
+        state: present
+        updated_cache: yes
   vars:
     certbot_auto_renew: true
     certbot_auto_renew_user: "{{ ansible_user | default(lookup('env', 'USER')) }}"
