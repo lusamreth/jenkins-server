@@ -17,6 +17,8 @@
     certbot_auto_renew_minute: "30"
     certbot_admin_email: lusomreth@gmail.com
     certbot_auto_renew_options: "--quiet"
+    certbot_create_standalone_stop_services:
+      - nginx
     certbot_create_if_missing: true
     certbot_certs:
       - domains:
