@@ -1,0 +1,26 @@
+---
+- name: check if nvm is installed
+  command: nvm --version
+  ignore_errors: true
+  register: installed
+
+- name: install node version manager
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh"
+    dest: /tmp/install-nvm.sh
+    mode: 0755
+  when: installed.rc != 0
+  register: download
+
+- name: Execute lazy-docker installation script
+  become_user: "{{ primary_user }}"
+  shell: /tmp/install-nvm.sh
+
+- name: Remove nvm script
+  file:
+    path: /tmp/install-nvm.sh
+    state: absent
+
+- name: install node
+  shell: "nvm install {{ lookup('NODE_VERSION', 'latest') }}"
+# tasks file for npm
