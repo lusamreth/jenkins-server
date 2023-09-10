@@ -1,0 +1,27 @@
+---
+- hosts: staging_server
+  become: true
+  tasks:
+    - name: Inject jenkin dockerfile
+      copy:
+        content: |
+          FROM jenkins/jenkins
+          USER root
+
+          RUN apt-get update
+          RUN apt-get install -y ansible
+
+          USER jenkins
+      dest: "{{ JENKINS_HOME }}/Dockerfile"
+
+    - name: build
+      docker_build:
+        path: "{{ JENKINS_HOME }}/Dockerfile"
+        source: build
+        name: "JENKINS-SERVER"
+        tag: latest
+
+    - name: clean up
+      docker_prune:
+        builder_cache: true
+        images: true
