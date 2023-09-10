@@ -1,34 +1,46 @@
-- hosts: localhost
+- hosts: "{{ target_server }}"
+  gather_facts: false
   become: true
   tasks:
     - name: Ensure certbot service is enabled
       service:
         name: certbot.timer
         state: started
+
     - name: Ensure crontab is installed
       apt:
-        name: cron
+        name:
+          - certbot
+          - cron
         state: present
         update_cache: yes
-  vars:
-    certbot_auto_renew: true
-    certbot_auto_renew_user: "{{ ansible_user | default(lookup('env', 'USER')) }}"
-    certbot_auto_renew_hour: "5"
-    certbot_auto_renew_minute: "30"
-    certbot_admin_email: lusomreth@gmail.com
-    certbot_auto_renew_options: "--quiet"
-    certbot_create_standalone_stop_services:
-      - nginx
-    certbot_create_if_missing: true
-    certbot_certs:
-      - domains:
-          - "{{ https_domain_url }}"
-      # shell: certbot -d {{ https_domain_url }} --nginx
+    - name: issuing the certificate
+      shell: |
+        certbot -n register --agree-tos --email "{{ ssl_admin_email }}"
+        touch /etc/letsencrypt/.registered
+      args:
+        creates: /etc/letsencrypt/.registered
+      tags:
+        - nginx
+        - certbot
+
+    - name: running certbot registration
+      command: certbot --nginx -d "{{ https_domain_url }}" -d "www.{{ https_domain_url }}"
+      args:
+        creates: "/etc/letsencrypt/live/{{ https_domain_url }}"
+
+    - name: Setup cronjob for renewal
+      cron:
+        name: certbot-renewal
+        job: "/bin/bash -lc '/usr/local/bin/certbot -q renew'"
+        minute: "0"
+        hour: "14"
+      tags:
+        - nginx
+        - certbot
 
   handlers:
     - name: restart certbot
       service:
         name: certbot.timer
         state: restarted
-  roles:
-    - geerlingguy.certbot
