@@ -14,7 +14,16 @@
 
 - name: Execute lazy-docker installation script
   become_user: "{{ primary_user }}"
-  shell: /tmp/install-nvm.sh
+  shell: bash /tmp/install-nvm.sh
+  args:
+    creates: "{{ ansible_env.HOME }}/.nvm/nvm.sh"
+
+- name: Setup .profile
+  become_user: "{{ ansible_user }}"
+  ansible.builtin.lineinfile:
+    path: ~/.profile
+    line: source ~/.nvm/nvm.sh # This will make sure Node is on the user's PATH
+    create: yes
 
 - name: Remove nvm script
   file:
@@ -22,5 +31,11 @@
     state: absent
 
 - name: install node
-  shell: "nvm install {{ lookup('NODE_VERSION', 'latest') }}"
+  become_user: "{{ ansible_user }}"
+  shell: |
+    source ~/.profile
+    nvm install {{ NODE_VERSION }}
+  args:
+    executable: /bin/bash
+    creates: ~/.nvm/versions/node/v{{ NODE_VERSION }}
 # tasks file for npm
