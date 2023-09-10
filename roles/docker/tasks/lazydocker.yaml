@@ -1,13 +1,31 @@
+- name: Check if lazy-docker install
+  command: lazydocker --version
+  ignore_errors: true
+  register: installed
+
 - name: Retrieve lazy-docker installation binary
   ansible.builtin.get_url:
-    url: https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh
+    url: "{{ lazy_docker_url }}"
     dest: /tmp/install-lazydocker.sh
+    mode: 0755
+  when: installed.rc != 0
+  register: download
+  notify:
+    - pull lazydocker script
+    - clean lazydocker script
+    - link global lazydocker
+# - name: Execute lazy-docker installation script
+#   become_user: "{{ primary_user }}"
+#   shell: /tmp/install-lazydocker.sh
 
-- name: Execute lazy-docker installation script
-  shell: /tmp/install-lazydocker.sh
-  when: download.changed
+# - name: Remove lazy-docker script
+#   file:
+#     path: /tmp/install-lazydocker.sh
+#     state: absent
 
-- name: Remove lazy-docker script
-  file:
-    path: /tmp/install-lazydocker.sh
-    present: absent
+# - name: symlink default lazydocker binary location to global /bin
+#   become: true
+#   file:
+#     src: "/home/{{ primary_user }}/.local/bin/lazydocker"
+#     dest: /usr/bin/lazydocker
+#     state: link

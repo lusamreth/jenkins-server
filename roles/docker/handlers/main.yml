@@ -1,2 +1,40 @@
 ---
+- name: executing lazy-docker installation script
+  become_user: "{{ primary_user }}"
+  shell: /tmp/install-lazydocker.sh
+  listen: pull lazydocker script
+
+- name: remove lazy-docker script
+  file:
+    path: /tmp/install-lazydocker.sh
+    state: absent
+  listen: clean lazydocker script
+
+- name: symlink default lazydocker binary location to global /bin
+  become: true
+  file:
+    src: "/home/{{ primary_user }}/.local/bin/lazydocker"
+    dest: /usr/bin/lazydocker
+    state: link
+  listen: link global lazydocker
+
+- name: Add docker gpg
+  apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    state: present
+  listen: docker gpg
+
+- name: Add Docker Repository
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu bionic stable
+    state: present
+  listen: docker repo
+
+- name: Enable and start Docker service
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+    enabled: true
+  when: docker_valid.rc == 0
+  listen: restart docker
 # handlers file for docker

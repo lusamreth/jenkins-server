@@ -4,34 +4,19 @@
   register: docker_valid
   ignore_errors: true
 
-- name: Ensure Docker is Installed
+- name: pre-config repo
+  command: echo "configuring docker repo"
+  notify:
+    - docker gpg
+    - docker repo
+
+- name: ensure Docker is Installed
   apt:
     name: docker.io
     state: present
     update_cache: true
   when: docker_valid.rc != 0
-
-- name: Add docker gpg
-  apt_key:
-    url: https://download.docker.com/linux/debian/gpg
-    state: present
-
-- name: Add Docker Repository
-  apt_repository:
-    repo: deb https://download.docker.com/linux/ubuntu bionic stable
-    state: present
-
-- name: Check If Docker Is Installed
-  command: docker --version
-  register: docker_valid
-  ignore_errors: true
-
-- name: Enable and start Docker service
-  ansible.builtin.service:
-    name: docker
-    state: restarted
-    enabled: true
-  when: docker_valid.rc== 0
+  notify: reload docker
 
 - name: Ensure group "docker" exists
   ansible.builtin.group:
@@ -43,36 +28,11 @@
     name: "{{ primary_user }}"
     groups: docker
     append: yes
+  register: add_to_docker_group_result
 
 - name: Include reset connection tasks
   ansible.builtin.include_tasks: reset_connection.yaml
   when: add_to_docker_group_result.changed == true
 
-- name: Check if lazy-docker install
-  command: lazydocker --version
-  ignore_errors: true
-  register: installed
-
-- name: Retrieve lazy-docker installation binary
-  ansible.builtin.get_url:
-    url: "{{ lazy_docker_url }}"
-    dest: /tmp/install-lazydocker.sh
-    mode: 0755
-  when: installed.rc != 0
-  register: download
-
-- name: Execute lazy-docker installation script
-  become_user: "{{ primary_user }}"
-  shell: /tmp/install-lazydocker.sh
-
-- name: Remove lazy-docker script
-  file:
-    path: /tmp/install-lazydocker.sh
-    state: absent
-
-- name: symlink default lazydocker binary location to global /bin
-  become: true
-  file:
-    src: "/home/{{ primary_user }}/.local/bin/lazydocker"
-    dest: /usr/bin/lazydocker
-    state: link
+- name: Setting up lazydocker
+  ansible.builtin.include_tasks: lazydocker.yaml
