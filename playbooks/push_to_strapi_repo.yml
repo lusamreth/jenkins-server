@@ -1,0 +1,25 @@
+---
+- hosts: staging_server
+  become: true
+  tasks:
+    - name: Login to docker registry
+      docker_login:
+      username: "{{ DOCKER_USERNAME }}"
+      password: "{{ DOCKER_PASSWORD }}"
+
+    - name: building the strapi image
+      docker_build:
+        path: "{{ PROJECT_PATH }}"
+        source: build
+        tag: latest
+        name: "{{ DOCKER_USERNAME }}/{{ DOCKER_IMAGE_NAME }}"
+        repository: "{{ DOCKER_REPO_DOMAIN }}/{{ DOCKER_USERNAME }}/{{ DOCKER_IMAGE_NAME }}"
+        dockerfile: "{{ PROJECT_DOCKERFILE | Default('Dockerfile ') }}"
+        push: true
+
+        # cloud.canister.io:5000/lusamreth/polymer-strapi-cms
+    - name: pruning the image
+      docker_build:
+        name: "{{ DOCKER_USERNAME }}/{{ DOCKER_IMAGE_NAME }}"
+        state: absent
+        tag: latest
