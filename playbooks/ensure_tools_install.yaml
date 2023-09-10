@@ -1,5 +1,6 @@
-- hosts: localhost
+- hosts: "{{ target_server }}"
   become: true
+  remote_user: "{{ ansible_user }}"
   tasks:
     - name: Install required system packages
       apt:
@@ -31,6 +32,27 @@
         name: fish
         state: present
 
+    - name: change and config fish shell
+      become: true
+      user:
+        name: "{{ ansible_user }}"
+        shell: /bin/fish
+
+    - name: install fisher
+      get_url:
+        url: https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish
+        dest: /tmp/install-fisher.fish
+        mode: 0755
+      # shell: curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
+
+    - name: sourcing fisher script
+      shell: |
+        source /tmp/install-fisher.fish
+        fisher install jorgebucaran/fisher
+      args:
+        executable: /usr/bin/fish
+        creates: "{{ ansible_env.HOME }}/.config/fish/functions/fisher.fish"
+
     - name: install nginx
       ansible.builtin.apt:
         name: nginx
@@ -51,3 +73,4 @@
 
   roles:
     - docker
+    - npm
