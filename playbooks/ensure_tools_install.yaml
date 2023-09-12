@@ -1,6 +1,8 @@
 - hosts: "{{ target_server }}"
   become: true
   remote_user: "{{ ansible_user }}"
+  vars:
+    ENABLE_NPM_VALUE: "{{ ENABLE_NPM | default(0) }}"
   tasks:
     - name: Install required system packages
       apt:
@@ -71,6 +73,9 @@
       ansible.builtin.apt:
         autoclean: yes
 
+    - name: Include rule only if need npm
+      include_role:
+        name: npm
+      when: ENABLE_NPM_VALUE == 1
   roles:
     - docker
-    - npm
