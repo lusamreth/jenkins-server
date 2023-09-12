@@ -1,6 +1,8 @@
 - hosts: "{{ target_server }}"
   gather_facts: false
   become: true
+  vars:
+    FORCE_RENEWAL_VAL: "{{ FORCE_RENEWAL | default(0) }}"
   tasks:
     - name: Ensure certbot service is enabled
       service:
@@ -14,6 +16,7 @@
           - cron
         state: present
         update_cache: yes
+
     - name: issuing the certificate
       shell: |
         certbot -n register --agree-tos --email "{{ ssl_admin_email }}"
@@ -24,8 +27,18 @@
         - nginx
         - certbot
 
+    - name: test ssl certificate exists
+      stat:
+        path: "/etc/letsencrypt/live/{{ https_domain_url }}"
+      register: certificate
+
+    - name: force certificate reset
+      become: true
+      command: rm -r /etc/letsencrypt/live/{{ https_domain_url }}
+      when: FORCE_RENEWAL_VAL == "1" and certificate.stat.exists
+
     - name: running certbot registration
-      command: certbot --nginx -d "{{ https_domain_url }}" -d "www.{{ https_domain_url }}"
+      command: certbot --nginx -d "{{ https_domain_url }}"
       args:
         creates: "/etc/letsencrypt/live/{{ https_domain_url }}"
 
