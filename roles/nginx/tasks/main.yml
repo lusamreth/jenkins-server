@@ -1,0 +1,15 @@
+---
+- name: create new nginx cfg via template
+  template:
+    src: default.conf
+    dest: "/etc/nginx/sites-available/{{ https_domain_url }}.conf"
+
+- name: enable new config file
+  file:
+    src: "/etc/nginx/sites-available/{{ https_domain_url }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ https_domain_url }}.conf"
+    state: link
+
+  notify:
+    - reload nginx
+# tasks file for nginx

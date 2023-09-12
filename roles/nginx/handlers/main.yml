@@ -1,0 +1,16 @@
+---
+- name: reload nginx
+  become: true
+  shell: nginx -s reload
+
+- name: restart nginx
+  service:
+    name: nginx
+    state: restarted
+  listen: "restart web services"
+
+- name: test nginx
+  become: true
+  shell: nginx -t
+  register: cfg_test
+# handlers file for nginx
