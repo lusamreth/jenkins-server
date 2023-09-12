@@ -1,7 +1,15 @@
 ---
 - hosts: staging_server
-  become: true
+  become_user: "{{ ansible_user }}"
+  # become: true
+  vars:
+    JENKINS_HOME_PATH: "{{ ansible_env.HOME }}/{{ JENKINS_HOME }}"
   tasks:
+    - name: Make jenkins home dir
+      file:
+        dest: "{{ JENKINS_HOME_PATH }}"
+        state: directory
+
     - name: Inject jenkin dockerfile
       copy:
         content: |
@@ -12,13 +20,16 @@
           RUN apt-get install -y ansible
 
           USER jenkins
-      dest: "{{ JENKINS_HOME }}/Dockerfile"
+        dest: "{{ JENKINS_HOME_PATH }}/Dockerfile"
+        owner: "{{ ansible_user }}"
 
-    - name: build
-      docker_build:
-        path: "{{ JENKINS_HOME }}/Dockerfile"
+    - name: build jenkin image
+      become_user: "{{ ansible_user }}"
+      docker_image:
+        build:
+          path: "{{ JENKINS_HOME_PATH }}"
         source: build
-        name: "JENKINS-SERVER"
+        name: "jenkin-server"
         tag: latest
 
     - name: clean up
