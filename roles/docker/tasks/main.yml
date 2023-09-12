@@ -16,7 +16,14 @@
     state: present
     update_cache: true
   when: docker_valid.rc != 0
-  notify: reload docker
+  notify: restart docker
+
+- name: ensure docker-compose is installed
+  apt:
+    pkg:
+      - docker-compose-plugin
+      - docker-compose
+    state: present
 
 - name: Ensure group "docker" exists
   ansible.builtin.group:

@@ -10,22 +10,11 @@
     mode: 0755
   when: installed.rc != 0
   register: download
+
+- name: Run lazy-docker installation script
+  shell: echo "installation began"
+  when: installed.rc != 0
   notify:
-    - pull lazydocker script
-    - clean lazydocker script
-    - link global lazydocker
-# - name: Execute lazy-docker installation script
-#   become_user: "{{ primary_user }}"
-#   shell: /tmp/install-lazydocker.sh
-
-# - name: Remove lazy-docker script
-#   file:
-#     path: /tmp/install-lazydocker.sh
-#     state: absent
-
-# - name: symlink default lazydocker binary location to global /bin
-#   become: true
-#   file:
-#     src: "/home/{{ primary_user }}/.local/bin/lazydocker"
-#     dest: /usr/bin/lazydocker
-#     state: link
+    - pull lazydocker-script
+    - clean lazydocker-script
+    - link global-lazydocker

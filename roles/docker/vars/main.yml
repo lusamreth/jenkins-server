@@ -1,5 +1,5 @@
 ---
 lazy_docker_url: "https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh"
-primary_user: "admin"
-ansible_user: "admin"
+primary_user: "ubuntu"
+ansible_user: "ubuntu"
 # vars file for docker
