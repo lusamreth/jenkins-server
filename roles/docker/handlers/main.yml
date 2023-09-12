@@ -2,13 +2,13 @@
 - name: executing lazy-docker installation script
   become_user: "{{ primary_user }}"
   shell: /tmp/install-lazydocker.sh
-  listen: pull lazydocker script
+  listen: pull lazydocker-script
 
 - name: remove lazy-docker script
   file:
     path: /tmp/install-lazydocker.sh
     state: absent
-  listen: clean lazydocker script
+  listen: clean lazydocker-script
 
 - name: symlink default lazydocker binary location to global /bin
   become: true
@@ -16,7 +16,7 @@
     src: "/home/{{ primary_user }}/.local/bin/lazydocker"
     dest: /usr/bin/lazydocker
     state: link
-  listen: link global lazydocker
+  listen: link global-lazydocker
 
 - name: Add docker gpg
   apt_key:
