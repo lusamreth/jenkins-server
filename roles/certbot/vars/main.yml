@@ -1,0 +1,3 @@
+---
+FORCE_RENEWAL_VAL: "{{ FORCE_RENEWAL | default(0) }}"
+# vars file for certbot

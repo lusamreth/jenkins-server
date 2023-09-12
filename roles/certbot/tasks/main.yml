@@ -1,0 +1,48 @@
+---
+- name: Ensure certbot service is enabled
+  service:
+    name: certbot.timer
+    state: started
+
+- name: Ensure crontab is installed
+  apt:
+    name:
+      - certbot
+      - cron
+    state: present
+    update_cache: yes
+
+- name: issuing the certificate
+  shell: |
+    certbot -n register --agree-tos --email "{{ ssl_admin_email }}"
+    touch /etc/letsencrypt/.registered
+  args:
+    creates: /etc/letsencrypt/.registered
+  tags:
+    - nginx
+    - certbot
+
+- name: test ssl certificate exists
+  stat:
+    path: "/etc/letsencrypt/live/{{ https_domain_url }}"
+  register: certificate
+
+- name: force certificate reset
+  become: true
+  command: rm -r /etc/letsencrypt/live/{{ https_domain_url }}
+  when: FORCE_RENEWAL_VAL == "1" and certificate.stat.exists
+
+- name: running certbot registration
+  command: certbot --nginx -d "{{ https_domain_url }}"
+  args:
+    creates: "/etc/letsencrypt/live/{{ https_domain_url }}"
+
+- name: Setup cronjob for renewal
+  cron:
+    name: certbot-renewal
+    job: "/bin/bash -lc '/usr/local/bin/certbot -q renew'"
+    minute: "0"
+    hour: "14"
+  tags:
+    - nginx
+    - certbot
