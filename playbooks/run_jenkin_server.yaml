@@ -1,0 +1,33 @@
+---
+- hosts: staging_server
+  become_user: "{{ ansible_user }}"
+  gather_facts: true
+  # become: true
+  vars:
+    JENKINS_HOME_PATH: "{{ ansible_env.HOME }}/{{ JENKINS_HOME }}"
+    PRIMARY_PORT_VAL: "{{ PRIMARY_PORT | default(3000) }}"
+    SECONDARY_PORT_VAL: "{{ SECONDARY_PORT | default(8080) }}"
+
+  tasks:
+    - name: copy jenkin compose file
+      copy:
+        src: "jenkins-compose.yaml"
+        dest: "{{ JENKINS_HOME_PATH }}"
+        mode: "0644"
+
+    - name: create docker compose env file
+      copy:
+        content: |
+          PRIMARY_PORT={{ PRIMARY_PORT_VAL }}
+          SECONDARY_PORT={{ SECONDARY_PORT_VAL }}
+          JENKIN_IMAGE=jenkin-server
+        dest: "{{ JENKINS_HOME_PATH }}/.env"
+
+    - name: running jenkin-server
+      shell:
+        cmd: |
+          docker-compose --env-file=.env -f jenkins-compose.yaml up -d
+        chdir: "{{ JENKINS_HOME_PATH }}"
+      register: output
+    - debug: var=output.stdout_lines
+    - debug: var=output.stderr
